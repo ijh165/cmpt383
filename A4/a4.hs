@@ -132,10 +132,7 @@ calc str =
     case top stack of
         Nothing      -> "empty stack"
         Just (Err e) -> e
-        Just (Num n) ->
-            if length stack == 1
-                then show n
-                else "invalid input"
+        Just (Num n) -> show n
     where stack = compute str
 
 -- ============================================================================
@@ -277,10 +274,10 @@ prop_rng_16 (NonNegative x) (NonNegative y) =
 
 prop_rng_17 :: NonEmptyList Int -> NonNegative Int -> NonNegative Int -> Bool
 prop_rng_17 (NonEmpty lst) (NonNegative x) (NonNegative y) =
-    calc (lst_str ++ " " ++ operands ++ " +") == "invalid input" &&
-    calc (lst_str ++ " " ++ operands ++ " *") == "invalid input" &&
-    calc (lst_str ++ " " ++ operands ++ " -") == "invalid input" &&
-    calc (lst_str ++ " " ++ operands ++ " /") == "invalid input"
+    calc (lst_str ++ " " ++ operands ++ " +") == calc (operands ++ " +") &&
+    calc (lst_str ++ " " ++ operands ++ " *") == calc (operands ++ " *") &&
+    calc (lst_str ++ " " ++ operands ++ " -") == calc (operands ++ " -") &&
+    calc (lst_str ++ " " ++ operands ++ " /") == calc (operands ++ " /")
     where
         lst_str = unwords $ map (show . abs) lst
         operands = show x ++ " " ++ show y
