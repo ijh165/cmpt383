@@ -5,7 +5,7 @@ data Token = Num Double | Opt Operator | Err String
 instance Show Token where
     show (Num n)   = "<" ++ show n ++ ">"
     show (Opt o)   = "<" ++ show o ++ ">"
-    show (Err e)   = "<error: " ++ e ++ ">"
+    show (Err e)   = "<error = " ++ e ++ ">"
 
 data Operator = 
     Unary String (Double -> Double)            |
@@ -124,11 +124,8 @@ compute str =
 -- !!! The last element is the top (marked with "*") !!!
 calcStack :: String -> String
 calcStack str =
-    case top stack of
-        Nothing  -> ""
-        Just tok ->
-            unwords (map show $ tail stack) ++ " " ++ show tok ++ "*"
-    where stack = compute str
+    if null stack_str then stack_str else stack_str ++ "*"
+    where stack_str = unwords $ map show $ reverse $ compute str
 
 calc :: String -> String
 calc str =
@@ -159,17 +156,46 @@ prop_given_10 = calc "2 3 inc * pop"                 == "empty stack"
 prop_given_11 = calc "3.2 sin dup * 3.2 cos dup * +" == "1.0"
 prop_given_12 = calc "2 +"                           == "+: not enough args"
 prop_given_13 = calc "dec"                           == "dec: empty stack"
+prop_given_14 = calc "3 inc"                         == calc "4"
+prop_given_15 = calc "3 inc inc"                     == calc "5"
+prop_given_16 = calc "3 dec"                         == calc "2"
+prop_given_17 = calc "3 dec dec"                     == calc "1"
+prop_given_18 = calc "3 sqrt"                        == "1.7320508075688772"
+prop_given_19 = calc "3 sin"                         == "0.1411200080598672"
+prop_given_20 = calc "3 cos"                         == "-0.9899924966004454"
+prop_given_21 = calc "3 inv"                         == "0.3333333333333333"
+prop_given_22 = calc "0 inv"                         == "Infinity"
+prop_given_23 = calc "4 2 +"                         == "6.0"
+prop_given_24 = calc "4 2 *"                         == "8.0"
+prop_given_25 = calc "4 2 -"                         == "2.0"
+prop_given_26 = calc "2 4 -"                         == "-2.0"
+prop_given_27 = calc "4 2 /"                         == "2.0"
+prop_given_28 = calc "2 4 /"                         == "0.5"
+prop_given_29 = calc "2 0 /"                         == "Infinity"
+prop_given_30 = calc "0 0 /"                         == "NaN"
+prop_given_31 = calc "1 2 3 4 +all"                  == "10.0"
+prop_given_32 = calc "1 2 3 4 *all"                  == "24.0"
+prop_given_33 = calcStack "4 dup"                    == "<4.0> <4.0>*"
+prop_given_34 = calc "4 dup *"                       == "16.0"
+prop_given_35 = calcStack "4 5 pop"                  == "<4.0>*"
+prop_given_36 = calc "4 5 pop"                       == "4.0"
+prop_given_37 = calc "1 2 3 clear"                   == "empty stack"
+prop_given_38 = calcStack "4 1 swap"                 == "<1.0> <4.0>*"
+prop_given_39 = calc "4 1 swap -"                    == "-3.0"
+prop_given_40 = calcStack "1 2 3 4.01"               == "<1.0> <2.0> <3.0> <4.01>*"
+prop_given_41 = calc "1 2 420blazeit"                == "invalid token: 420blazeit"
+prop_given_42 = calcStack "1 2 hi 4 2 0"             == "<1.0> <2.0> <error = invalid token: hi>*"
 
 -- Empty stack edge case
-prop_empty_1 = calc ""                              == "empty stack"
-prop_empty_2 = calc "inc"                           == "inc: empty stack"
-prop_empty_3 = calc "dec"                           == "dec: empty stack"
-prop_empty_4 = calc "sqrt"                          == "sqrt: empty stack"
-prop_empty_5 = calc "sin"                           == "sin: empty stack"
-prop_empty_6 = calc "cos"                           == "cos: empty stack"
-prop_empty_7 = calc "inv"                           == "inv: empty stack"
-prop_empty_8 = calc "+"                             == "+: empty stack"
-prop_empty_9 = calc "*"                             == "*: empty stack"
+prop_empty_1 = calc ""                               == "empty stack"
+prop_empty_2 = calc "inc"                            == "inc: empty stack"
+prop_empty_3 = calc "dec"                            == "dec: empty stack"
+prop_empty_4 = calc "sqrt"                           == "sqrt: empty stack"
+prop_empty_5 = calc "sin"                            == "sin: empty stack"
+prop_empty_6 = calc "cos"                            == "cos: empty stack"
+prop_empty_7 = calc "inv"                            == "inv: empty stack"
+prop_empty_8 = calc "+"                              == "+: empty stack"
+prop_empty_9 = calc "*"                              == "*: empty stack"
 prop_empty_10 = calc "-"                             == "-: empty stack"
 prop_empty_11 = calc "/"                             == "/: empty stack"
 prop_empty_12 = calc "+all"                          == "+all: empty stack"
@@ -237,7 +263,8 @@ prop_rng_14 (NonNegative n) = calc (show n ++ " dup pop") == calc (show n)
 
 prop_rng_15 :: NonEmptyList Int -> NonEmptyList Int -> Bool
 prop_rng_15 (NonEmpty lst1) (NonEmpty lst2) = 
-    calc (lst1_str ++ " clear " ++ lst2_str ++ " *all") == calc (lst2_str ++ " *all")
+    calc (lst1_str ++ " clear " ++ lst2_str ++ " *all") == calc (lst2_str ++ " *all") &&
+    calc (lst1_str ++ " clear " ++ lst2_str ++ " +all") == calc (lst2_str ++ " +all")
     where
         lst1_str = unwords $ map (show . abs) lst1
         lst2_str = unwords $ map (show . abs) lst2
@@ -273,6 +300,35 @@ runTests = do
     quickCheck prop_given_11
     quickCheck prop_given_12
     quickCheck prop_given_13
+    quickCheck prop_given_14
+    quickCheck prop_given_15
+    quickCheck prop_given_16
+    quickCheck prop_given_17
+    quickCheck prop_given_18
+    quickCheck prop_given_19
+    quickCheck prop_given_20
+    quickCheck prop_given_21
+    quickCheck prop_given_22
+    quickCheck prop_given_23
+    quickCheck prop_given_24
+    quickCheck prop_given_25
+    quickCheck prop_given_26
+    quickCheck prop_given_27
+    quickCheck prop_given_28
+    quickCheck prop_given_29
+    quickCheck prop_given_30
+    quickCheck prop_given_31
+    quickCheck prop_given_32
+    quickCheck prop_given_33
+    quickCheck prop_given_34
+    quickCheck prop_given_35
+    quickCheck prop_given_36
+    quickCheck prop_given_37
+    quickCheck prop_given_38
+    quickCheck prop_given_39
+    quickCheck prop_given_40
+    quickCheck prop_given_41
+    quickCheck prop_given_42
     putStrLn "\n===== Testing with empty stack edge case ====="
     quickCheck prop_empty_1
     quickCheck prop_empty_2
