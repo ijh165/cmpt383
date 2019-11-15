@@ -146,109 +146,110 @@ calc str =
 -- ============================================================================
 
 -- Given test cases
-prop1  = calc "1 2 + 3 *"                     == "9.0"
-prop2  = calc "1 2 3 * +"                     == "7.0"
-prop3  = calc "2 sqrt 3 sqrt +"               == "3.1462643699419726"
-prop4  = calc "11 dup *"                      == "121.0"
-prop5  = calc "0 5 /"                         == "0.0"
-prop6  = calc "5 0 /"                         == "Infinity"
-prop7  = calc "2 3 + 4 2 +all"                == "11.0"
-prop8  = calc "2 3 + 4 2 *all"                == "40.0"
-prop9  = calc "2 3 + 4 2 clear"               == "empty stack"
-prop10 = calc "2 3 inc * pop"                 == "empty stack"
-prop11 = calc "3.2 sin dup * 3.2 cos dup * +" == "1.0"
-prop12 = calc "2 +"                           == "+: not enough args"
-prop13 = calc "dec"                           == "dec: empty stack"
+prop_given_1  = calc "1 2 + 3 *"                     == "9.0"
+prop_given_2  = calc "1 2 3 * +"                     == "7.0"
+prop_given_3  = calc "2 sqrt 3 sqrt +"               == "3.1462643699419726"
+prop_given_4  = calc "11 dup *"                      == "121.0"
+prop_given_5  = calc "0 5 /"                         == "0.0"
+prop_given_6  = calc "5 0 /"                         == "Infinity"
+prop_given_7  = calc "2 3 + 4 2 +all"                == "11.0"
+prop_given_8  = calc "2 3 + 4 2 *all"                == "40.0"
+prop_given_9  = calc "2 3 + 4 2 clear"               == "empty stack"
+prop_given_10 = calc "2 3 inc * pop"                 == "empty stack"
+prop_given_11 = calc "3.2 sin dup * 3.2 cos dup * +" == "1.0"
+prop_given_12 = calc "2 +"                           == "+: not enough args"
+prop_given_13 = calc "dec"                           == "dec: empty stack"
 
 -- Empty stack edge case
-prop14 = calc "inc"                           == "inc: empty stack"
-prop15 = calc "dec"                           == "dec: empty stack"
-prop16 = calc "sqrt"                          == "sqrt: empty stack"
-prop17 = calc "sin"                           == "sin: empty stack"
-prop18 = calc "cos"                           == "cos: empty stack"
-prop19 = calc "inv"                           == "inv: empty stack"
-prop20 = calc "+"                             == "+: empty stack"
-prop21 = calc "*"                             == "*: empty stack"
-prop22 = calc "-"                             == "-: empty stack"
-prop23 = calc "/"                             == "/: empty stack"
-prop24 = calc "+all"                          == "+all: empty stack"
-prop25 = calc "*all"                          == "*all: empty stack"
-prop26 = calc "dup"                           == "dup: empty stack"
-prop27 = calc "pop"                           == "pop: empty stack"
-prop28 = calc "clear"                         == "empty stack"
-prop29 = calc "swap"                          == "swap: empty stack"
+prop_empty_1 = calc ""                              == "empty stack"
+prop_empty_2 = calc "inc"                           == "inc: empty stack"
+prop_empty_3 = calc "dec"                           == "dec: empty stack"
+prop_empty_4 = calc "sqrt"                          == "sqrt: empty stack"
+prop_empty_5 = calc "sin"                           == "sin: empty stack"
+prop_empty_6 = calc "cos"                           == "cos: empty stack"
+prop_empty_7 = calc "inv"                           == "inv: empty stack"
+prop_empty_8 = calc "+"                             == "+: empty stack"
+prop_empty_9 = calc "*"                             == "*: empty stack"
+prop_empty_10 = calc "-"                             == "-: empty stack"
+prop_empty_11 = calc "/"                             == "/: empty stack"
+prop_empty_12 = calc "+all"                          == "+all: empty stack"
+prop_empty_13 = calc "*all"                          == "*all: empty stack"
+prop_empty_14 = calc "dup"                           == "dup: empty stack"
+prop_empty_15 = calc "pop"                           == "pop: empty stack"
+prop_empty_16 = calc "clear"                         == "empty stack"
+prop_empty_17 = calc "swap"                          == "swap: empty stack"
 
 -- Randomized test cases
 
-prop30 :: NonNegative Int -> Bool
-prop30 (NonNegative n) = calc (show n ++ " +")              == "+: not enough args"
+prop_rng_1 :: NonNegative Int -> Bool
+prop_rng_1 (NonNegative n) = calc (show n ++ " +")              == "+: not enough args"
 
-prop31 :: NonNegative Int -> Bool
-prop31 (NonNegative n) = calc (show n ++ " *")              == "*: not enough args"
+prop_rng_2 :: NonNegative Int -> Bool
+prop_rng_2 (NonNegative n) = calc (show n ++ " *")              == "*: not enough args"
 
-prop32 :: NonNegative Int -> Bool
-prop32 (NonNegative n) = calc (show n ++ " -")              == "-: not enough args"
+prop_rng_3 :: NonNegative Int -> Bool
+prop_rng_3 (NonNegative n) = calc (show n ++ " -")              == "-: not enough args"
 
-prop33 :: NonNegative Int -> Bool
-prop33 (NonNegative n) = calc (show n ++ " /")              == "/: not enough args"
+prop_rng_4 :: NonNegative Int -> Bool
+prop_rng_4 (NonNegative n) = calc (show n ++ " /")              == "/: not enough args"
 
-prop34 :: NonNegative Int -> Bool
-prop34 (NonNegative n) = calc (show n ++ " +all")           == calc (show n)
+prop_rng_5 :: NonNegative Int -> Bool
+prop_rng_5 (NonNegative n) = calc (show n ++ " +all")           == calc (show n)
 
-prop35 :: NonNegative Int -> Bool
-prop35 (NonNegative n) = calc (show n ++ " *all")           == calc (show n)
+prop_rng_6 :: NonNegative Int -> Bool
+prop_rng_6 (NonNegative n) = calc (show n ++ " *all")           == calc (show n)
 
-prop36 :: NonNegative Int -> Bool
-prop36 (NonNegative n) = calc (show n ++ " inc dec") == calc (show n)
+prop_rng_7 :: NonNegative Int -> Bool
+prop_rng_7 (NonNegative n) = calc (show n ++ " inc dec") == calc (show n)
 
-prop37 :: NonNegative Int -> Bool
-prop37 (NonNegative n) = calc (show n ++ " dec inc") == calc (show n)
+prop_rng_8 :: NonNegative Int -> Bool
+prop_rng_8 (NonNegative n) = calc (show n ++ " dec inc") == calc (show n)
 
-prop38 :: NonNegative Int -> Bool
-prop38 (NonNegative n) = 
+prop_rng_9 :: NonNegative Int -> Bool
+prop_rng_9 (NonNegative n) = 
     round (read $ calc (show n ++ " sqrt dup *") :: Double) == n
 
-prop39 :: NonNegative Int -> Bool
-prop39 (NonNegative n) =
+prop_rng_10 :: NonNegative Int -> Bool
+prop_rng_10 (NonNegative n) =
     -- sin(-n) = -sin(n)
     calc ("0 " ++ show n ++ " - sin") == calc ("0 " ++ show n ++ " sin -")
 
-prop40 :: NonNegative Int -> Bool
-prop40 (NonNegative n) =
+prop_rng_11 :: NonNegative Int -> Bool
+prop_rng_11 (NonNegative n) =
     -- cos(-n) = cos(n)
     calc ("0 " ++ show n ++ " - cos") == calc (show n ++ " cos")
 
-prop41 :: NonNegative Int -> NonNegative Int -> Bool
-prop41 (NonNegative x) (NonNegative y) =
+prop_rng_12 :: NonNegative Int -> NonNegative Int -> Bool
+prop_rng_12 (NonNegative x) (NonNegative y) =
     -- sin(x + y) = sin(x)cos(y) + cos(x)sin(y)
     round (read $ calc lhs :: Double) == round (read $ calc rhs :: Double)
     where
         lhs = show x ++ " " ++ show y ++ " + sin"
         rhs = show x ++ " sin " ++ show y ++ " cos * " ++ show x ++ " cos " ++ show y ++ " sin * +"
 
-prop42 :: NonNegative Int -> Bool
-prop42 (NonNegative n) =
+prop_rng_13 :: NonNegative Int -> Bool
+prop_rng_13 (NonNegative n) =
     -- 1/(1/x) = x
     round (read $ calc (show n ++ " inv inv") :: Double) == round (read $ calc (show n) :: Double)
 
-prop43 :: NonNegative Int -> Bool
-prop43 (NonNegative n) = calc (show n ++ " dup pop") == calc (show n)
+prop_rng_14 :: NonNegative Int -> Bool
+prop_rng_14 (NonNegative n) = calc (show n ++ " dup pop") == calc (show n)
 
-prop44 :: NonEmptyList Int -> NonEmptyList Int -> Bool
-prop44 (NonEmpty lst1) (NonEmpty lst2) = 
+prop_rng_15 :: NonEmptyList Int -> NonEmptyList Int -> Bool
+prop_rng_15 (NonEmpty lst1) (NonEmpty lst2) = 
     calc (lst1_str ++ " clear " ++ lst2_str ++ " *all") == calc (lst2_str ++ " *all")
     where
         lst1_str = unwords $ map (show . abs) lst1
         lst2_str = unwords $ map (show . abs) lst2
 
-prop45 :: NonNegative Int -> NonNegative Int -> Bool
-prop45 (NonNegative x) (NonNegative y) =
+prop_rng_16 :: NonNegative Int -> NonNegative Int -> Bool
+prop_rng_16 (NonNegative x) (NonNegative y) =
     calc (operands ++ " swap swap -") == calc (operands ++ " -") &&
     calc (operands ++ " swap swap /") == calc (operands ++ " /")
     where operands = show x ++ " " ++ show y
 
-prop46 :: NonEmptyList Int -> NonNegative Int -> NonNegative Int -> Bool
-prop46 (NonEmpty lst) (NonNegative x) (NonNegative y) =
+prop_rng_17 :: NonEmptyList Int -> NonNegative Int -> NonNegative Int -> Bool
+prop_rng_17 (NonEmpty lst) (NonNegative x) (NonNegative y) =
     calc (lst_str ++ " " ++ operands ++ " +") == "invalid input" &&
     calc (lst_str ++ " " ++ operands ++ " *") == "invalid input" &&
     calc (lst_str ++ " " ++ operands ++ " -") == "invalid input" &&
@@ -259,51 +260,52 @@ prop46 (NonEmpty lst) (NonNegative x) (NonNegative y) =
 
 runTests = do
     putStrLn "\n===== Testing with given test cases ====="
-    quickCheck prop1
-    quickCheck prop2
-    quickCheck prop3
-    quickCheck prop4
-    quickCheck prop5
-    quickCheck prop6
-    quickCheck prop7
-    quickCheck prop8
-    quickCheck prop9
-    quickCheck prop10
-    quickCheck prop11
-    quickCheck prop12
-    quickCheck prop13
+    quickCheck prop_given_1
+    quickCheck prop_given_2
+    quickCheck prop_given_3
+    quickCheck prop_given_4
+    quickCheck prop_given_5
+    quickCheck prop_given_6
+    quickCheck prop_given_7
+    quickCheck prop_given_8
+    quickCheck prop_given_9
+    quickCheck prop_given_10
+    quickCheck prop_given_11
+    quickCheck prop_given_12
+    quickCheck prop_given_13
     putStrLn "\n===== Testing with empty stack edge case ====="
-    quickCheck prop14
-    quickCheck prop15
-    quickCheck prop16
-    quickCheck prop17
-    quickCheck prop18
-    quickCheck prop19
-    quickCheck prop20
-    quickCheck prop21
-    quickCheck prop22
-    quickCheck prop23
-    quickCheck prop24
-    quickCheck prop25
-    quickCheck prop26
-    quickCheck prop27
-    quickCheck prop28
-    quickCheck prop29
+    quickCheck prop_empty_1
+    quickCheck prop_empty_2
+    quickCheck prop_empty_3
+    quickCheck prop_empty_4
+    quickCheck prop_empty_5
+    quickCheck prop_empty_6
+    quickCheck prop_empty_7
+    quickCheck prop_empty_8
+    quickCheck prop_empty_9
+    quickCheck prop_empty_10
+    quickCheck prop_empty_11
+    quickCheck prop_empty_12
+    quickCheck prop_empty_13
+    quickCheck prop_empty_14
+    quickCheck prop_empty_15
+    quickCheck prop_empty_16
+    quickCheck prop_empty_17
     putStrLn "\n===== Testing with randomized test cases ====="
-    quickCheck prop30
-    quickCheck prop31
-    quickCheck prop32
-    quickCheck prop33
-    quickCheck prop34
-    quickCheck prop35
-    quickCheck prop36
-    quickCheck prop37
-    quickCheck prop38
-    quickCheck prop39
-    quickCheck prop40
-    quickCheck prop41
-    quickCheck prop42
-    quickCheck prop43
-    quickCheck prop44
-    quickCheck prop45
-    quickCheck prop46
+    quickCheck prop_rng_1
+    quickCheck prop_rng_2
+    quickCheck prop_rng_3
+    quickCheck prop_rng_4
+    quickCheck prop_rng_5
+    quickCheck prop_rng_6
+    quickCheck prop_rng_7
+    quickCheck prop_rng_8
+    quickCheck prop_rng_9
+    quickCheck prop_rng_10
+    quickCheck prop_rng_11
+    quickCheck prop_rng_12
+    quickCheck prop_rng_13
+    quickCheck prop_rng_14
+    quickCheck prop_rng_15
+    quickCheck prop_rng_16
+    quickCheck prop_rng_17
