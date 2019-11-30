@@ -275,6 +275,13 @@ func countWordsTest(verbose bool) {
 			"the":   1,
 			"apple": 1,
 		},
+		"oMeGa L u l U L": {
+			"oMeGa": 1,
+			"L":     2,
+			"u":     1,
+			"l":     1,
+			"U":     1,
+		},
 		"": {},
 	}
 
@@ -312,7 +319,7 @@ func countWordsTest(verbose bool) {
 
 		if !reflect.DeepEqual(actualMap, expectedMap) {
 			failures++
-			fmt.Printf("Failed. Expected: %v. Actual: %v", actualMap, expectedMap)
+			fmt.Printf("Failed. Expected: %v. Actual: %v", expectedMap, actualMap)
 			fmt.Println()
 			fmt.Println("File content:")
 			fmt.Println(fileContent)
@@ -509,12 +516,12 @@ func linearSearchTest() {
 			return
 		}
 
-	type TestCases struct {
+	type TestCase struct {
 		x, lst   interface{}
 		expected int
 	}
 
-	testCases := []TestCases{
+	testCases := []TestCase{
 		{5, []int{4, 2, -1, 5, 0}, 3},
 		{3, []int{4, 2, -1, 5, 0}, -1},
 		{"egg", []string{"cat", "nose", "egg"}, 2},
@@ -526,7 +533,7 @@ func linearSearchTest() {
 		{[]int{}, [][]int{{}, {}, {}}, 0},
 	}
 
-	invalidTestCases := []TestCases{
+	invalidTestCases := []TestCase{
 		{"egg", []int{4, 2, -1, 5, 0}, -1},
 		{5, []string{"cat", "nose", "egg"}, -1},
 		{true, []int{1, 2, 3}, -1},
