@@ -5,13 +5,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math"
-	"math/rand"
 	"os"
 	"reflect"
-	"sort"
 	"strconv"
 	"strings"
-	"time"
 )
 
 // ============================================================================
@@ -337,29 +334,42 @@ func countWordsTest(verbose bool) {
 
 // #3 tests
 
-var validTimes = map[Time24]string{
-	Time24{hour: 23, minute: 59, second: 59}: "23:59:59",
-	Time24{hour: 23, minute: 0, second: 0}:   "23:00:00",
-	Time24{hour: 0, minute: 59, second: 0}:   "00:59:00",
-	Time24{hour: 0, minute: 0, second: 59}:   "00:00:59",
-	Time24{hour: 0, minute: 0, second: 0}:    "00:00:00",
-	Time24{hour: 1, minute: 2, second: 3}:    "01:02:03",
-	Time24{hour: 6, minute: 35, second: 7}:   "06:35:07",
-	Time24{hour: 5, minute: 39, second: 8}:   "05:39:08",
-	Time24{hour: 5, minute: 39, second: 8}:   "05:39:08",
+var validTimes = []Time24{
+	Time24{23, 59, 59},
+	Time24{23, 0, 0},
+	Time24{6, 35, 7},
+	Time24{5, 39, 8},
+	Time24{5, 39, 8},
+	Time24{1, 2, 3},
+	Time24{0, 59, 0},
+	Time24{0, 0, 59},
+	Time24{0, 0, 0},
 }
+
+var validTimesStr = []string{
+	"23:59:59",
+	"23:00:00",
+	"06:35:07",
+	"05:39:08",
+	"05:39:08",
+	"01:02:03",
+	"00:59:00",
+	"00:00:59",
+	"00:00:00",
+}
+
 var invalidTimes = []Time24{
-	// Time24{-1, -1, -1},
 	Time24{24, 60, 60},
 	Time24{24, 59, 59},
 	Time24{23, 60, 59},
 	Time24{23, 59, 60},
+	Time24{255, 255, 255},
 }
 
 func equalsTime24Test() {
 	fmt.Println("=== Testing equalsTime24 ===")
 	failures := 0
-	for time := range validTimes {
+	for _, time := range validTimes {
 		if !equalsTime24(time, time) {
 			failures++
 			fmt.Printf(
@@ -378,26 +388,26 @@ func equalsTime24Test() {
 func lessThanTime24Test() {
 	fmt.Println("=== Testing lessThanTime24 ===")
 
-	validTimesSorted := make([]Time24, len(validTimes))
-	i := 0
-	for time := range validTimes {
-		validTimesSorted[i] = time
-		i++
-	}
-	sort.Slice(validTimesSorted, func(i, j int) bool {
-		return lessThanTime24(validTimesSorted[i], validTimesSorted[j])
-	})
-
 	failures := 0
-	for i, t := range validTimesSorted {
+	for i, t := range validTimes {
 		if i == 0 {
 			continue
 		}
-		prev := validTimesSorted[i-1]
+		prev := validTimes[i-1]
 		if equalsTime24(prev, t) {
+			if lessThanTime24(t, prev) {
+				failures++
+				fmt.Printf(
+					"Failed on lessThanTime24(%v, %v). Expected: %v. Actual: %v",
+					prev,
+					t,
+					false,
+					true)
+				fmt.Println()
+			}
 			continue
 		}
-		if !lessThanTime24(prev, t) {
+		if !lessThanTime24(t, prev) {
 			failures++
 			fmt.Printf(
 				"Failed on lessThanTime24(%v, %v). Expected: %v. Actual: %v",
@@ -416,8 +426,9 @@ func lessThanTime24Test() {
 func timeStringTest() {
 	fmt.Println("=== Testing t.String() ===")
 	failures := 0
-	for time, expectedStr := range validTimes {
+	for i, time := range validTimes {
 		actualStr := time.String()
+		expectedStr := validTimesStr[i]
 		if actualStr != expectedStr {
 			failures++
 			fmt.Printf(
@@ -434,7 +445,7 @@ func timeStringTest() {
 func validTime24Test() {
 	fmt.Println("=== Testing t.validTime24() ===")
 	failures := 0
-	for time := range validTimes {
+	for _, time := range validTimes {
 		if !time.validTime24() {
 			failures++
 			fmt.Printf(
@@ -459,21 +470,8 @@ func validTime24Test() {
 func minTime24Test() {
 	fmt.Println("=== Testing minTime24() ===")
 
-	validTimesShuffled := make([]Time24, len(validTimes))
-	i := 0
-	for time := range validTimes {
-		validTimesShuffled[i] = time
-		i++
-	}
-
-	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(validTimesShuffled), func(i, j int) {
-		validTimesShuffled[i], validTimesShuffled[j] =
-			validTimesShuffled[j], validTimesShuffled[i]
-	})
-
 	failures := 0
-	actualMinTime, _ := minTime24(validTimesShuffled)
+	actualMinTime, _ := minTime24(validTimes)
 	expectedMinTime := Time24{0, 0, 0}
 	if !equalsTime24(actualMinTime, expectedMinTime) {
 		failures++
@@ -632,12 +630,6 @@ func main() {
 	timeStringTest()
 	validTime24Test()
 	minTime24Test()
-
-	// fmt.Println(linearSearch(5, []int{4, 2, -1, 5, 0}))
-	// fmt.Println(linearSearch(3, []int{4, 2, -1, 5, 0}))
-	// fmt.Println(linearSearch("egg", []string{"cat", "nose", "egg"}))
-	// fmt.Println(linearSearch("up", []string{"cat", "nose", "egg"}))
-	// fmt.Println(linearSearch("egg", []int{}))
 
 	linearSearchTest()
 	allBitSeqsTest()
