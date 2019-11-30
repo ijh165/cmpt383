@@ -4,11 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"math"
+	"math/rand"
 	"os"
 	"reflect"
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // ============================================================================
@@ -137,6 +140,59 @@ func minTime24(times []Time24) (minTime Time24, err error) {
 	return
 }
 
+// #4
+
+func linearSearch(x interface{}, lst interface{}) int {
+	if reflect.TypeOf(lst).Kind() != reflect.Slice {
+		panic("lst should be a slice!")
+	}
+
+	if reflect.TypeOf(x) != reflect.TypeOf(lst).Elem() {
+		panic("Type of x should be same as type of elements in lst!")
+	}
+
+	lstVal := reflect.ValueOf(lst)
+	for i := 0; i < lstVal.Len(); i++ {
+		if reflect.DeepEqual(x, lstVal.Index(i).Interface()) {
+			return i
+		}
+	}
+
+	return -1
+}
+
+// #5
+
+func toBitSeq(num int, bitSize int) (seq []int) {
+	binStr := strconv.FormatInt(int64(num), 2)
+
+	// apply zero padding
+	padSize := bitSize - len(binStr)
+	if padSize < 0 {
+		padSize = 0
+	}
+	binStr = strings.Repeat("0", padSize) + binStr
+
+	// convert to slice
+	for _, bitChar := range binStr {
+		bit, _ := strconv.Atoi(string(bitChar))
+		seq = append(seq, bit)
+	}
+
+	return
+}
+
+func allBitSeqs(n int) [][]int {
+	if n <= 0 {
+		return make([][]int, 0)
+	}
+	bitSeqs := make([][]int, int(math.Pow(2, float64(n))))
+	for i := range bitSeqs {
+		bitSeqs[i] = toBitSeq(i, n)
+	}
+	return bitSeqs
+}
+
 // ============================================================================
 // TESTING
 // ============================================================================
@@ -144,12 +200,13 @@ func minTime24(times []Time24) (minTime Time24, err error) {
 func checkFailures(failures int) {
 	if failures > 0 {
 		fmt.Printf("%v test cases failed", failures)
+		fmt.Println()
 	} else {
 		fmt.Println("All Test Passed")
 	}
 }
 
-// countEmirpsLessThan tests
+// #1 tests
 
 func countEmirpsLessThanTest(verbose bool) {
 	fmt.Println("=== Testing countEmirpsLessThan ===")
@@ -199,7 +256,7 @@ func countEmirpsLessThanTest(verbose bool) {
 	fmt.Println()
 }
 
-// countWords tests
+// #2 tests
 
 func countWordsTest(verbose bool) {
 	fmt.Println("=== Testing countWords ===")
@@ -271,13 +328,14 @@ func countWordsTest(verbose bool) {
 	if err == nil {
 		failures++
 		fmt.Printf("Failed. Expected error upon non-existent file. Actual is nil.")
+		fmt.Println()
 	}
 
 	checkFailures(failures)
 	fmt.Println()
 }
 
-// Time24 tests
+// #3 tests
 
 var validTimes = map[Time24]string{
 	Time24{hour: 23, minute: 59, second: 59}: "23:59:59",
@@ -290,9 +348,16 @@ var validTimes = map[Time24]string{
 	Time24{hour: 5, minute: 39, second: 8}:   "05:39:08",
 	Time24{hour: 5, minute: 39, second: 8}:   "05:39:08",
 }
+var invalidTimes = []Time24{
+	// Time24{-1, -1, -1},
+	Time24{24, 60, 60},
+	Time24{24, 59, 59},
+	Time24{23, 60, 59},
+	Time24{23, 59, 60},
+}
 
 func equalsTime24Test() {
-	fmt.Println("=== Testing equalsTime24Test ===")
+	fmt.Println("=== Testing equalsTime24 ===")
 	failures := 0
 	for time := range validTimes {
 		if !equalsTime24(time, time) {
@@ -303,6 +368,7 @@ func equalsTime24Test() {
 				time,
 				true,
 				false)
+			fmt.Println()
 		}
 	}
 	checkFailures(failures)
@@ -339,6 +405,7 @@ func lessThanTime24Test() {
 				t,
 				true,
 				false)
+			fmt.Println()
 		}
 	}
 
@@ -347,17 +414,211 @@ func lessThanTime24Test() {
 }
 
 func timeStringTest() {
-	fmt.Println("=== Testing lessThanTime24 ===")
+	fmt.Println("=== Testing t.String() ===")
 	failures := 0
-	for time, str := range validTimes {
-		if time.String() != str {
+	for time, expectedStr := range validTimes {
+		actualStr := time.String()
+		if actualStr != expectedStr {
 			failures++
 			fmt.Printf(
 				"Failed. Expected: %v. Actual: %v",
-				str,
-				time.String())
+				expectedStr,
+				actualStr)
+			fmt.Println()
 		}
 	}
+	checkFailures(failures)
+	fmt.Println()
+}
+
+func validTime24Test() {
+	fmt.Println("=== Testing t.validTime24() ===")
+	failures := 0
+	for time := range validTimes {
+		if !time.validTime24() {
+			failures++
+			fmt.Printf(
+				"Failed. Expected to be valid time for %v",
+				time)
+			fmt.Println()
+		}
+	}
+	for _, time := range invalidTimes {
+		if time.validTime24() {
+			failures++
+			fmt.Printf(
+				"Failed. Expected to be invalid time for %v",
+				time)
+			fmt.Println()
+		}
+	}
+	checkFailures(failures)
+	fmt.Println()
+}
+
+func minTime24Test() {
+	fmt.Println("=== Testing minTime24() ===")
+
+	validTimesShuffled := make([]Time24, len(validTimes))
+	i := 0
+	for time := range validTimes {
+		validTimesShuffled[i] = time
+		i++
+	}
+
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(validTimesShuffled), func(i, j int) {
+		validTimesShuffled[i], validTimesShuffled[j] =
+			validTimesShuffled[j], validTimesShuffled[i]
+	})
+
+	failures := 0
+	actualMinTime, _ := minTime24(validTimesShuffled)
+	expectedMinTime := Time24{0, 0, 0}
+	if !equalsTime24(actualMinTime, expectedMinTime) {
+		failures++
+		fmt.Printf(
+			"Failed. Expected min time to be %v",
+			expectedMinTime)
+		fmt.Println()
+	}
+
+	_, err := minTime24([]Time24{})
+	if err == nil {
+		failures++
+		fmt.Printf("Failed. Expected error upon empty array. Actual is nil.")
+		fmt.Println()
+	}
+
+	checkFailures(failures)
+	fmt.Println()
+}
+
+// #4 tests
+
+func linearSearchTest() {
+	fmt.Println("=== Testing linearSearch ===")
+
+	// helper function to check if linearSearch panics
+	linearSearchPanics :=
+		func(x interface{}, lst interface{}) (panicOccurred bool) {
+			defer func() {
+				if err := recover(); err != nil {
+					panicOccurred = true
+				}
+			}()
+			linearSearch(x, lst)
+			return
+		}
+
+	type TestCases struct {
+		x, lst   interface{}
+		expected int
+	}
+
+	testCases := []TestCases{
+		{5, []int{4, 2, -1, 5, 0}, 3},
+		{3, []int{4, 2, -1, 5, 0}, -1},
+		{"egg", []string{"cat", "nose", "egg"}, 2},
+		{"up", []string{"cat", "nose", "egg"}, -1},
+		{5, []int{4, 2, -1, 5, 5, 0}, 3},
+		{"nose", []string{"cat", "nose", "nose", "egg"}, 1},
+		{true, []bool{false, false, true, true, false}, 2},
+		{[]int{1, 2}, [][]int{{5, 6}, {1, 2}, {3, 4}}, 1},
+		{[]int{}, [][]int{{}, {}, {}}, 0},
+	}
+
+	invalidTestCases := []TestCases{
+		{"egg", []int{4, 2, -1, 5, 0}, -1},
+		{5, []string{"cat", "nose", "egg"}, -1},
+		{true, []int{1, 2, 3}, -1},
+		{[]int{1, 2}, [][]string{{"hello"}, {"world"}}, -1},
+		{"egg", []int{}, -1},
+		{5, []string{}, -1},
+		{true, []int{}, -1},
+		{[]int{}, [][]string{}, -1},
+	}
+
+	failures := 0
+	for _, testCase := range testCases {
+		actual := linearSearch(testCase.x, testCase.lst)
+		if actual != testCase.expected {
+			failures++
+			fmt.Printf(
+				"Failed on linearSearch(%v, %v). Expected: %v. Actual: %v",
+				testCase.x,
+				testCase.lst,
+				testCase.expected,
+				actual)
+			fmt.Println()
+		}
+	}
+
+	for _, testCase := range invalidTestCases {
+		if !linearSearchPanics(testCase.x, testCase.lst) {
+			failures++
+			fmt.Printf(
+				"Failed on linearSearch(%v, %v). Expected to panic.",
+				testCase.x,
+				testCase.lst)
+			fmt.Println()
+		}
+	}
+
+	checkFailures(failures)
+	fmt.Println()
+}
+
+// #5 tests
+
+func allBitSeqsTest() {
+	fmt.Println("=== Testing allBitSeqs ===")
+
+	testCases := map[int][][]int{
+		-1: {},
+		0:  {},
+		1:  {{0}, {1}},
+		2:  {{0, 0}, {0, 1}, {1, 0}, {1, 1}},
+		3: {
+			{0, 0, 0},
+			{0, 0, 1},
+			{0, 1, 0},
+			{0, 1, 1},
+			{1, 0, 0},
+			{1, 0, 1},
+			{1, 1, 0},
+			{1, 1, 1},
+		},
+	}
+
+	failures := 0
+	for n, expectedBitSeqs := range testCases {
+		actualBitSeqs := allBitSeqs(n)
+		if !reflect.DeepEqual(actualBitSeqs, expectedBitSeqs) {
+			failures++
+			fmt.Printf(
+				"Failed on allBitSeqs(%v). Expected: %v. Actual: %v",
+				n,
+				expectedBitSeqs,
+				actualBitSeqs)
+			fmt.Println()
+		}
+	}
+
+	for n := 4; n <= 16; n++ {
+		bitSeqs := allBitSeqs(n)
+		actualLen := len(bitSeqs)
+		expectedLen := int(math.Pow(2, float64(n)))
+		if actualLen != expectedLen {
+			fmt.Printf(
+				"Failed on allBitSeqs(%v). Expected len: %v. Actual len: %v",
+				n,
+				expectedLen,
+				actualLen)
+			fmt.Println()
+		}
+	}
+
 	checkFailures(failures)
 	fmt.Println()
 }
@@ -369,4 +630,15 @@ func main() {
 	equalsTime24Test()
 	lessThanTime24Test()
 	timeStringTest()
+	validTime24Test()
+	minTime24Test()
+
+	// fmt.Println(linearSearch(5, []int{4, 2, -1, 5, 0}))
+	// fmt.Println(linearSearch(3, []int{4, 2, -1, 5, 0}))
+	// fmt.Println(linearSearch("egg", []string{"cat", "nose", "egg"}))
+	// fmt.Println(linearSearch("up", []string{"cat", "nose", "egg"}))
+	// fmt.Println(linearSearch("egg", []int{}))
+
+	linearSearchTest()
+	allBitSeqsTest()
 }
